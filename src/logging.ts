@@ -90,7 +90,7 @@ class OutputChannelManager implements vscode.Disposable {
     get(name: string) {
         const channel = this._channels.get(name);
         if (!channel) {
-            const new_channel = vscode.window.createOutputChannel(name);
+            const new_channel = vscode.window.createOutputChannel(name, 'cmakeout');
             this._channels.set(name, new_channel);
             return new_channel;
         }

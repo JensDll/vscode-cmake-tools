@@ -27,7 +27,7 @@ import { chokidarOnAnyChange, ProgressHandle, reportProgress } from '@cmt/util';
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-const log = logging.createLogger('kitsController');
+const log = logging.createLogger('kits-controller');
 
 export enum KitsReadMode {
     userKits,

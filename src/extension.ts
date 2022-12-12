@@ -30,7 +30,7 @@ import { FireNow, FireLate } from '@cmt/prop';
 import rollbar from '@cmt/rollbar';
 import { StateManager } from './state';
 import { StatusBar } from '@cmt/status';
-import { cmakeTaskProvider, CMakeTaskProvider } from '@cmt/cmakeTaskProvider';
+import { CMakeTaskProvider } from '@cmt/cmakeTaskProvider';
 import * as telemetry from '@cmt/telemetry';
 import { ProjectOutlineProvider, TargetNode, SourceFileNode, WorkspaceFolderNode } from '@cmt/tree';
 import * as util from '@cmt/util';
@@ -45,7 +45,6 @@ import { CMakeToolsApiImpl } from './api';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-let taskProvider: vscode.Disposable;
 
 const log = logging.createLogger('extension');
 
@@ -1763,7 +1762,7 @@ async function setup(context: vscode.ExtensionContext, progress?: ProgressHandle
         return vscode.commands.executeCommand(`cmake.${key}`, ...args);
     }
 
-    context.subscriptions.push(...[
+    context.subscriptions.push(
         // Special commands that don't require logging or separate error handling
         vscode.commands.registerCommand('cmake.outline.configureAll', () => runCommand('configureAll')),
         vscode.commands.registerCommand('cmake.outline.buildAll', () => runCommand('buildAll')),
@@ -1791,7 +1790,7 @@ async function setup(context: vscode.ExtensionContext, progress?: ProgressHandle
             (what: SourceFileNode) => runCommand('compileFile', what.filePath)),
         vscode.commands.registerCommand('cmake.outline.selectWorkspace',
             (what: WorkspaceFolderNode) => runCommand('selectWorkspace', what.wsFolder))
-    ]);
+    );
 
     return { getApi: (_version) => ext.api };
 }
@@ -1831,7 +1830,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<api.CM
     vscode.workspace.registerTextDocumentContentProvider('cmake-tools-schema', new SchemaProvider());
     await util.setContextValue("inCMakeProject", true);
 
-    taskProvider = vscode.tasks.registerTaskProvider(CMakeTaskProvider.CMakeScriptType, cmakeTaskProvider);
+    CMakeTaskProvider.register(context);
 
     return setup(context);
 }
@@ -1896,8 +1895,5 @@ export async function deactivate() {
     log.debug(localize('deactivate.cmaketools', 'Deactivate CMakeTools'));
     if (extensionManager) {
         await extensionManager.asyncDispose();
-    }
-    if (taskProvider) {
-        taskProvider.dispose();
     }
 }

@@ -1,0 +1,149 @@
+# Every available tag as passed to `createLogger`:
+#  cache               main                cmake
+#  task-provider       code-pages          compdb
+#  config cpptools     ctest               debugger 
+#  cmakefileapi-parser cmakefileapi-driver legacy-driver
+#  cms-client          expand              extension
+#  visual-studio kit   kits-controller     preset
+#  preset-controller   proc                rollbar
+#  variant             driver              build
+name: CMake output grammar
+scopeName: text.cmakeout
+patterns:
+  - include: '#section_cmake'
+  - include: '#section_build'
+  - include: '#section_ctest'
+  - include: '#section_other'
+repository:
+  section_cmake:
+    begin: ^(?=\[cmake\])
+    end: ^(?=\[(?!cmake))
+    patterns:
+      - include: '#tag'
+      - include: '#boolean'
+      - include: '#type'
+      - include: '#deprecated'
+      - include: '#warning'
+      - include: '#error'
+
+  section_build:
+    begin: ^(?=\[build\])
+    end: ^(?=\[(?!build))
+    patterns:
+      - match: ^(\[build\])\s(\[.+?\])
+        captures:
+          1:
+            name: markup.inserted cmakeout.tag
+          2:
+            name: comment cmakeout.progress
+      - include: '#tag'
+      - include: '#deprecated'
+      - include: '#warning'
+      - include: '#error'
+
+  section_ctest:
+    begin: ^(?=\[ctest\])
+    end: ^(?=\[(?!ctest))
+    patterns:
+      - include: '#tag'
+      - include: '#test_pass'
+      - include: '#test_fail'
+      - include: '#deprecated'
+      - include: '#warning'
+      - include: '#error'
+
+  section_other:
+    begin: ^(?=\[(.+?)\])
+    end: ^(?=\[(?!\1))
+    patterns:
+      - include: '#tag'
+      - include: '#boolean'
+      - include: '#type'
+      - include: '#deprecated'
+      - include: '#warning'
+      - include: '#error'
+
+  deprecated_message:
+    begin: CMake Deprecation Warning (?:in|at)
+    end: ^(?=\[.*?\]\s\S)
+    name: cmakeout.message.deprecated
+    patterns:
+      - include: '#tag'
+  deprecated_message_inline:
+    match: CMake Deprecation Warning.*
+    name: cmakeout.message.deprecated
+  deprecated:
+    patterns:
+      - include: '#deprecated_message'
+      - include: '#deprecated_message_inline'
+
+  warning_message:
+    begin: CMake Warning (?:in|at)
+    end: ^(?=\[.*?\]\s\S)
+    name: cmakeout.message.warning
+    patterns:
+      - include: '#tag'
+  warning_message_dev:
+    begin: CMake Warning \(dev\) (?:in|at)
+    end: This warning is for project developers..*
+    name: cmakeout.message.warning
+    patterns:
+      - include: '#tag'
+  warning_message_inline:
+    match: CMake Warning.*
+    name: cmakeout.message.warning
+  warning:
+    patterns:
+      - include: '#warning_message'
+      - include: '#warning_message_dev'
+      - include: '#warning_message_inline'
+
+  error_message:
+    begin: CMake Error (?:in|at)
+    end: ^(?=\[.*?\]\s\S)
+    name: cmakeout.message.error
+    patterns:
+      - include: '#tag'
+  error_message_inline:
+    match: CMake Error.*
+    name: cmakeout.message.error
+  error:
+    patterns:
+      - include: '#error_message'
+      - include: '#error_message_inline'
+
+  test_pass_message:
+    match: 100% tests passed
+    name: cmakeout.test.pass
+  test_pass:
+    patterns:
+      - include: '#test_pass_message'
+
+  test_fail_message:
+    match: '[1-9]\d* tests failed'
+    name: cmakeout.test.fail
+  test_fail_summary:
+    begin: 'The following tests FAILED:'
+    end: (?=\[ctest\]\s\S)
+    contentName: cmakeout.test.fail
+    patterns:
+      - include: '#tag'
+  test_fail:
+    patterns:
+      - include: '#test_fail_message'
+      - include: '#test_fail_summary'
+
+  boolean:
+    match: \b(?:ON|YES|TRUE|Y|OFF|NO|FALSE|N|IGNORE|NOTFOUND)\b
+    name: constant.language cmakeout.boolean
+
+  type:
+    match: \b[A-Z_]{2,}\b
+    name: support.type cmakeout.type
+
+  tag:
+    match: ^\[.*?\]\s(?:(--)\s\[.*?\]\s)?
+    name: markup.inserted cmakeout.tag
+    captures:
+      1:
+        name: constant.language cmakeout.log-context.hyphen

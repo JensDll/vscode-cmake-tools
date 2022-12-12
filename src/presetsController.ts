@@ -20,7 +20,7 @@ import json5 = require('json5');
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
 
-const log = logging.createLogger('presetController');
+const log = logging.createLogger('preset-controller');
 
 type SetPresetsFileFunc = (folder: string, presets: preset.PresetsFile | undefined) => void;
 

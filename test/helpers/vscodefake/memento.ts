@@ -22,6 +22,10 @@ export class TestMemento implements vscode.Memento {
     public clear() {
         this.storage.clear();
     }
+    // Needed since https://github.com/DefinitelyTyped/DefinitelyTyped/pull/54383/files#diff-0a5f3d01be8ab95a0ca83baa6915417d7497d254e6f0b508447db7388111a2e4R6228-R6234
+    public keys(): readonly string[] {
+        throw new Error('Method not implemented');
+    }
 }
 
 export class StateMemento implements vscode.Memento {
@@ -45,5 +49,8 @@ export class StateMemento implements vscode.Memento {
     public setKeysForSync(_keys: string[]): void {}
     public clear() {
         this.storage = {};
+    }
+    public keys(): readonly string[] {
+        throw new Error('Method not implemented');
     }
 }

@@ -16,7 +16,7 @@ import * as telemetry from '@cmt/telemetry';
 
 nls.config({ messageFormat: nls.MessageFormat.bundle, bundleFormat: nls.BundleFormat.standalone })();
 const localize: nls.LocalizeFunc = nls.loadMessageBundle();
-const log = logging.createLogger('TaskProvider');
+const log = logging.createLogger('task-provider');
 
 const endOfLine: string = "\r\n";
 
@@ -104,9 +104,6 @@ export class CMakeTaskProvider implements vscode.TaskProvider {
     static CMakeScriptType: string = 'cmake';
     static CMakeSourceStr: string = "CMake";
 
-    constructor() {
-    }
-
     public async provideTasks(): Promise<CMakeTask[]> {
         const result: CMakeTask[] = [];
         const cmakeProject: CMakeProject | undefined = getCMakeProjectForActiveFolder();
@@ -160,6 +157,11 @@ export class CMakeTaskProvider implements vscode.TaskProvider {
             return resolvedTask;
         }
         return undefined;
+    }
+
+    static register(context: vscode.ExtensionContext) {
+        const taskProvider: vscode.Disposable = vscode.tasks.registerTaskProvider(CMakeTaskProvider.CMakeScriptType, new CMakeTaskProvider());
+        context.subscriptions.push(taskProvider);
     }
 }
 
@@ -444,4 +446,3 @@ export class CustomBuildTaskTerminal implements vscode.Pseudoterminal, proc.Outp
     }
 }
 
-export const cmakeTaskProvider: CMakeTaskProvider = new CMakeTaskProvider();
